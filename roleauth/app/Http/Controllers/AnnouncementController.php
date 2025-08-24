@@ -11,7 +11,30 @@ class AnnouncementController extends Controller
 {
     // List for the logged-in user
 
-    public function index(Request $request)
+//     public function index(Request $request)
+// {
+//     $user = $request->user();
+
+//     $announcements = Announcement::query()
+//         ->where(function ($query) use ($user) {
+//             $query->whereNull('audience_type')
+//                   ->orWhere('audience_type', $user->role)
+//                   ->orWhere('audience_type', 'all'); // सबके लिए
+//         })
+//         ->orderByDesc('is_sticky')
+//         ->orderByDesc('starts_at')
+//         ->latest()
+//         ->get();
+
+//     $reads = DB::table('announcement_reads')
+//         ->where('user_id', $user->id)
+//         ->pluck('announcement_id')
+//         ->all();
+
+//     return view('announcements.index', compact('announcements', 'reads'));
+// }
+
+public function index(Request $request)
 {
     $user = $request->user();
 
@@ -19,20 +42,34 @@ class AnnouncementController extends Controller
         ->where(function ($query) use ($user) {
             $query->whereNull('audience_type')
                   ->orWhere('audience_type', $user->role)
-                  ->orWhere('audience_type', 'all'); // सबके लिए
+                  ->orWhere('audience_type', 'all');
         })
         ->orderByDesc('is_sticky')
         ->orderByDesc('starts_at')
         ->latest()
         ->get();
 
-    $reads = DB::table('announcement_reads')
+    // Already read announcements
+    $alreadyRead = DB::table('announcement_reads')
         ->where('user_id', $user->id)
         ->pluck('announcement_id')
         ->all();
 
-    return view('announcements.index', compact('announcements', 'reads'));
+    // New reads mark karna
+    foreach ($announcements as $announcement) {
+        if (!in_array($announcement->id, $alreadyRead)) {
+            DB::table('announcement_reads')->insert([
+                'user_id' => $user->id,
+                'announcement_id' => $announcement->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+    return view('announcements.index', compact('announcements', 'alreadyRead'));
 }
+
 
     // Admin create
     public function store(Request $request) {

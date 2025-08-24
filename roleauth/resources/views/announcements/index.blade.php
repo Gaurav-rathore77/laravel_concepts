@@ -5,7 +5,7 @@
     <h2 class="mb-4">Announcements</h2>
 
     @foreach($announcements as $announcement)
-        <div class="card mb-3 {{ in_array($announcement->id, $reads) ? 'bg-light' : 'bg-white' }}">
+        <div class="card bg-white mb-3 {{ in_array($announcement->id, $alreadyRead) ? 'bg-light' : 'bg-white' }}">
             <div class="card-body">
                 <h5 class="card-title">
                     {{ $announcement->title }}
@@ -21,8 +21,8 @@
 
                 <button class="btn btn-sm btn-primary mark-read-btn mt-2"
                     data-id="{{ $announcement->id }}"
-                    {{ in_array($announcement->id, $reads) ? 'disabled' : '' }}>
-                    {{ in_array($announcement->id, $reads) ? 'Read' : 'Mark as Read' }}
+                    {{ in_array($announcement->id, $alreadyRead) ? 'disabled' : '' }}>
+                    {{ in_array($announcement->id, $alreadyRead) ? 'Read' : 'Mark as Read' }}
                 </button>
             </div>
         </div>
